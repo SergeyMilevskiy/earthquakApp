@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
+import com.annimon.stream.Stream;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -28,7 +29,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private NetworkManager networkManager;
     private List<Feature> last = new ArrayList<>();
     private FeatureCollection featureCollection;
+    private boolean isMapReady;
+    private boolean isDataReady;
 
+    private boolean isDatafiled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +59,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void ready() {
         featureCollection = networkManager.getFeatureCollection();
+        last.clear();
         last.addAll(featureCollection.getFeatures());
+        isDataReady = true;
+        Log.d("Sergey", "network Callback call " + "isMapReady " + isMapReady);
+        fillMap("from ready");
+    }
 
-        if (mMap != null) {
-            for (Feature point : last) {
+    private void fillMap(String from) {
+        if (isMapReady && isDataReady) {
+            mMap.clear();
+          /*  for (Feature point : last) {
                 mMap.addMarker(new MarkerOptions().position(new LatLng(point.getGeometry().getLongtitude(), point.getGeometry().getLatitude())).title(point.getProperties().getPlace()));
                 Log.d("Sergey", " Lat " + point.getGeometry().getLongtitude() + " Lng " + point.getGeometry().getLatitude());
-            }
+            } */
+
+            Stream.of(last).forEach(point -> mMap.addMarker(new MarkerOptions().position(new LatLng(point.getGeometry().getLongtitude(), point.getGeometry().getLatitude())).title(point.getProperties().getPlace())));
+            Log.d("Sergey ", from);
+            LatLng sydney = new LatLng(last.get(0).getGeometry().getLongtitude(),last.get(0).getGeometry().getLatitude());
+            mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         }
     }
 
@@ -77,11 +93,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        isMapReady = true;
+        Log.d("Sergey", "mapCallback call " + "isDataReady " + isDataReady);
+
+        fillMap("from onMapReady");
 
         // Add a marker in Sydney and move the camera
-        //  LatLng sydney = new LatLng(38.2647, -118.7475);
+        //   LatLng sydney = new LatLng(38.2647, -118.7475);
         //   mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         //   mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("Sergey ", "OnResume");
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("Sergey ", "OnStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("Sergey ", "OnDestroy");
+        isMapReady = false;
+        isDataReady = false;
+    }
 }

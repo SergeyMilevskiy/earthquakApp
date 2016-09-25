@@ -85,10 +85,8 @@ public class NetworkManager {
                 public void onResponse(Call<FeatureCollection> call, Response<FeatureCollection> response) {
                     if (response.isSuccessful()) {
                         Log.d("Sergey", "OK");
-
                         featureCollection = response.body();
                         calling.ready();
-
                     }
                 }
 
