@@ -1,9 +1,13 @@
 package com.sergey.earthqukeapp;
 
 /**
- * Created by sergey on 25.09.16.
+ * Created by smilevkiy on 18.08.17.
  */
-public interface Presenter {
 
+public interface Presenter<T extends UI> {
+
+    void attacheUI(T ui);
+
+    void detachUI();
 
 }
